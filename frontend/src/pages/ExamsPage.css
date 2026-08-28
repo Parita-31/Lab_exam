@@ -1,0 +1,426 @@
+/* =========================================================
+   DDU UNIVERSITY EXAMS PAGE STYLING (UPCOMING, ACTIVE, PAST)
+   ========================================================= */
+
+.exams-page-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f1f5f9;
+    color: #1e293b;
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+}
+
+.exams-main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+.exams-content-body {
+    padding: 1.75rem 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Header Section */
+.exams-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    background: #ffffff;
+    padding: 1.25rem 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.exams-header-info h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 0.35rem 0;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.exams-header-info p {
+    color: #64748b;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.category-tag-header {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.category-tag-header.upcoming {
+    background: #e0f2fe;
+    color: #0284c7;
+    border: 1px solid #bae6fd;
+}
+
+.category-tag-header.active {
+    background: #e6fffa;
+    color: #0d9488;
+    border: 1px solid #99f6e4;
+    animation: pulseTeal 2s infinite;
+}
+
+.category-tag-header.past {
+    background: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+}
+
+@keyframes pulseTeal {
+    0% {
+        box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 8px rgba(13, 148, 136, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(13, 148, 136, 0);
+    }
+}
+
+/* Category Navigation Tabs */
+.exam-tabs-bar {
+    display: flex;
+    gap: 0.5rem;
+    background: #ffffff;
+    padding: 0.375rem;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.exam-tab-btn {
+    flex: 1;
+    padding: 0.65rem 1.15rem;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.exam-tab-btn:hover {
+    color: #008080;
+    background: #f1f5f9;
+}
+
+.exam-tab-btn.active {
+    background: #008080; /* DDU Teal Accent */
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 128, 128, 0.25);
+}
+
+.tab-count-badge {
+    background: rgba(255, 255, 255, 0.25);
+    padding: 0.1rem 0.45rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+}
+
+/* Search and Filters */
+.exams-controls-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.search-input-wrapper {
+    position: relative;
+    flex: 1;
+    min-width: 280px;
+}
+
+.search-input-wrapper input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    color: #0f172a;
+    font-size: 0.925rem;
+    transition: border-color 0.2s;
+}
+
+.search-input-wrapper input:focus {
+    outline: none;
+    border-color: #008080;
+    box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.15);
+}
+
+.search-icon {
+    position: absolute;
+    left: 0.875rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 1rem;
+}
+
+.batch-filter-select {
+    padding: 0.75rem 1rem;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    color: #0f172a;
+    font-size: 0.925rem;
+    outline: none;
+    cursor: pointer;
+}
+
+.batch-filter-select:focus {
+    border-color: #008080;
+}
+
+/* Exam Cards Grid */
+.exam-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.exam-card-item {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.35rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.exam-card-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    border-color: #cbd5e1;
+}
+
+.exam-card-item.active-exam-card {
+    border-top: 4px solid #008080;
+    background: #ffffff;
+}
+
+.exam-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.85rem;
+}
+
+.exam-card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 0.25rem 0;
+    line-height: 1.3;
+}
+
+.exam-card-subject {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0;
+    font-weight: 600;
+}
+
+/* Status Badges */
+.status-pill {
+    padding: 0.2rem 0.65rem;
+    border-radius: 9999px;
+    font-size: 0.725rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+
+.status-pill.status-upcoming {
+    background: #e0f2fe;
+    color: #0284c7;
+    border: 1px solid #bae6fd;
+}
+
+.status-pill.status-active {
+    background: #e6fffa;
+    color: #0d9488;
+    border: 1px solid #99f6e4;
+}
+
+.status-pill.status-past,
+.status-pill.status-completed {
+    background: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+}
+
+.status-pill.status-draft {
+    background: #fef3c7;
+    color: #d97706;
+    border: 1px solid #fde68a;
+}
+
+/* Time status bar inside card */
+.time-status-banner {
+    background: #f8fafc;
+    padding: 0.55rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.825rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: 1px solid #e2e8f0;
+}
+
+.time-status-banner.upcoming {
+    color: #0284c7;
+    background: #f0f9ff;
+}
+
+.time-status-banner.active {
+    color: #0d9488;
+    background: #e6fffa;
+}
+
+.time-status-banner.past {
+    color: #64748b;
+}
+
+/* Card Details Meta */
+.exam-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    font-size: 0.85rem;
+}
+
+.meta-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.meta-label {
+    color: #64748b;
+    font-size: 0.725rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.1rem;
+}
+
+.meta-value {
+    color: #1e293b;
+    font-weight: 600;
+}
+
+/* Action Buttons */
+.card-actions-wrapper {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.action-btn-primary {
+    flex: 1;
+    padding: 0.65rem 1rem;
+    background: #008080; /* DDU Teal Accent */
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.action-btn-primary:hover {
+    background: #0d9488;
+}
+
+.action-btn-primary.btn-start-live {
+    background: #ea580c; /* DDU Flame Orange Accent for Live Exams */
+}
+
+.action-btn-primary.btn-start-live:hover {
+    background: #c2410c;
+}
+
+.action-btn-secondary {
+    padding: 0.65rem 1rem;
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.action-btn-secondary:hover {
+    background: #e2e8f0;
+}
+
+/* Empty state */
+.empty-exams-container {
+    background: #ffffff;
+    border: 1px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 3.5rem 2rem;
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.empty-icon {
+    font-size: 2.75rem;
+    margin-bottom: 0.85rem;
+    color: #94a3b8;
+}
+
+.empty-exams-container h3 {
+    font-size: 1.2rem;
+    color: #0f172a;
+    margin: 0 0 0.4rem 0;
+}
+
+.empty-exams-container p {
+    color: #64748b;
+    max-width: 480px;
+    margin: 0 auto 1.25rem auto;
+    font-size: 0.9rem;
+}

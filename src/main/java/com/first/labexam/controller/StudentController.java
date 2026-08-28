@@ -1,16 +1,48 @@
 package com.first.labexam.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.first.labexam.dto.ExamSummaryResponse;
+import com.first.labexam.dto.StudentDashboardResponse;
+import com.first.labexam.service.ExamService;
+import com.first.labexam.service.StudentService;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/student")
+@CrossOrigin(origins = "http://localhost:5173")
 public class StudentController {
 
-    @GetMapping("/dashboard")
-    public String dashboard() {
+    private final StudentService studentService;
+    private final ExamService examService;
 
-        return "Welcome to Student Dashboard";
+    public StudentController(
+            StudentService studentService,
+            ExamService examService
+    ) {
+        this.studentService = studentService;
+        this.examService = examService;
+    }
+
+    @GetMapping("/dashboard/{studentId}")
+    public StudentDashboardResponse dashboard(
+            @PathVariable Long studentId
+    ) {
+        return studentService.getDashboard(studentId);
+    }
+
+    @GetMapping("/{studentId}/exams")
+    public List<ExamSummaryResponse> exams(
+            @PathVariable Long studentId,
+            @RequestParam(required = false) String status
+    ) {
+        return examService.listForStudent(studentId, status);
+    }
+
+    @GetMapping("/exams/{examId}")
+    public com.first.labexam.dto.ExamResponse getExamDetails(
+            @PathVariable Long examId
+    ) {
+        return examService.getExam(examId);
     }
 }

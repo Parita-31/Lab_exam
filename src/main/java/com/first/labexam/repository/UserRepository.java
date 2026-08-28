@@ -1,7 +1,6 @@
 package com.first.labexam.repository;
 
 
-
 import com.first.labexam.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -12,4 +11,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     Optional<User> findByEnrollmentNumber(String enrollmentNumber);
+
+    long countByRole(String role);
+
+    long countByRoleAndBatch(String role, String batch);
 }
