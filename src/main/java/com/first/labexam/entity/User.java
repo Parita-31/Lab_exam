@@ -1,9 +1,6 @@
 package com.first.labexam.entity;
 
-
-
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -17,29 +14,55 @@ public class User {
     @Column(nullable = false, length = 100)
     private String name;
 
-    @Column(nullable = false, unique = true, length = 150)
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String password;
 
-    @Column(name = "enrollment_number", unique = true, length = 50)
+    @Column(name = "enrollment_number", unique = true)
     private String enrollmentNumber;
 
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false)
     private String role;
 
-    @Column(length = 50)
     private String department;
 
-    @Column(length = 50)
     private String batch;
 
-    @Column(nullable = false, length = 20)
-    private String status = "ACTIVE";
+    private Integer semester;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "profile_image")
+    private String profileImage;
+
+    @Column(nullable = false)
+    private String status;
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    public User() {
+    }
+
+    @PrePersist
+    public void prePersist() {
+
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+
+        if (status == null) {
+            status = "ACTIVE";
+        }
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
@@ -97,6 +120,22 @@ public class User {
         this.batch = batch;
     }
 
+    public Integer getSemester() {
+        return semester;
+    }
+
+    public void setSemester(Integer semester) {
+        this.semester = semester;
+    }
+
+    public String getProfileImage() {
+        return profileImage;
+    }
+
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
+    }
+
     public String getStatus() {
         return status;
     }
@@ -112,22 +151,4 @@ public class User {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
-
-    public User() {
-    }
-
-    // Generate getters and setters using IntelliJ
 }

@@ -1,7 +1,5 @@
 package com.first.labexam.service;
 
-
-
 import com.first.labexam.dto.LoginRequest;
 import com.first.labexam.dto.LoginResponse;
 import com.first.labexam.entity.User;
@@ -11,7 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AuthService{
+public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -29,47 +27,81 @@ public class AuthService{
 
     public LoginResponse login(LoginRequest request) {
 
-        User user = findUser(request.getIdentifier());
+        // Validate request
+        if (request == null) {
+            throw new RuntimeException("Login request cannot be null");
+        }
 
-        if (!user.getStatus().equals("ACTIVE")) {
+        if (request.getIdentifier() == null ||
+                request.getIdentifier().trim().isEmpty()) {
+            throw new RuntimeException("Email or enrollment number is required");
+        }
+
+        if (request.getPassword() == null ||
+                request.getPassword().isEmpty()) {
+            throw new RuntimeException("Password is required");
+        }
+
+        // Remove accidental spaces from identifier
+        String identifier = request.getIdentifier().trim();
+
+        // Find user by email or enrollment number
+        User user = findUser(identifier);
+
+        // Check account status
+        if (user.getStatus() == null ||
+                !user.getStatus().equalsIgnoreCase("ACTIVE")) {
+
             throw new RuntimeException("User account is inactive");
         }
 
-        if (!passwordEncoder.matches(
-                request.getPassword(),
-                user.getPassword()
-        )) {
+        // Check password
+        if (user.getPassword() == null ||
+                !passwordEncoder.matches(
+                        request.getPassword(),
+                        user.getPassword()
+                )) {
+
             throw new RuntimeException("Invalid credentials");
         }
 
+        // Generate JWT token
         String token = jwtService.generateToken(
                 user.getEmail(),
                 user.getRole()
         );
 
+        // Return login response
         return new LoginResponse(
                 token,
                 user.getRole(),
-                user.getName()
+                user.getName(),
+                user.getId()
         );
     }
 
+
     private User findUser(String identifier) {
 
+        // Login using email
         if (identifier.contains("@")) {
 
             return userRepository
                     .findByEmail(identifier)
                     .orElseThrow(() ->
-                            new RuntimeException("Invalid credentials")
+                            new RuntimeException(
+                                    "Invalid credentials"
+                            )
                     );
-
         }
 
+        // Login using enrollment number
         return userRepository
                 .findByEnrollmentNumber(identifier)
                 .orElseThrow(() ->
-                        new RuntimeException("Invalid credentials")
+                        new RuntimeException(
+                                "Invalid credentials"
+                        )
                 );
     }
 }

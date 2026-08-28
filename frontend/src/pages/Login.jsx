@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import DduLogo from "../components/DduLogo";
 import "./Login.css";
 
 function Login() {
@@ -41,33 +42,21 @@ function Login() {
 
             const data = await response.json();
 
-            localStorage.setItem(
-                "token",
-                data.token
-            );
+            console.log("LOGIN RESPONSE:", data);
 
-            localStorage.setItem(
-                "role",
-                data.role
-            );
-
-            localStorage.setItem(
-                "name",
-                data.name
-            );
+            localStorage.setItem("user", JSON.stringify(data));
+            localStorage.setItem("userId", String(data.userId));
+            localStorage.setItem("token", data.token || "");
+            localStorage.setItem("role", data.role || "");
+            localStorage.setItem("name", data.name || "");
 
             if (data.role === "STUDENT") {
-
                 navigate("/student/dashboard");
-
             } else if (data.role === "PROFESSOR") {
-
                 navigate("/professor/dashboard");
-
             }
 
         } catch (error) {
-
             setError(error.message);
         }
     };
@@ -81,14 +70,14 @@ function Login() {
 
                 <div className="login-header">
 
-                    <div className="university-logo">
-                        DDU
+                    <div style={{ display: "flex", justifyContent: "center", marginBottom: "15px" }}>
+                        <DduLogo height={48} />
                     </div>
 
                     <h1>Lab Examination Portal</h1>
 
                     <p>
-                        Deen Dayal Upadhyaya University
+                        Dharmsinh Desai University (DDU)
                     </p>
 
                 </div>
