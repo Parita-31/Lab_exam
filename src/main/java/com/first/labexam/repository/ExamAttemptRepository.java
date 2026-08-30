@@ -4,8 +4,14 @@ import com.first.labexam.entity.ExamAttempt;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Optional;
+
 @Repository
 public interface ExamAttemptRepository extends JpaRepository<ExamAttempt, Long> {
 
     long countByExamId(Long examId);
+    Optional<ExamAttempt> findFirstByExamIdAndStudentIdOrderByIdDesc(Long examId, Long studentId);
+    List<ExamAttempt> findByExamIdAndStudentId(Long examId, Long studentId);
+    List<ExamAttempt> findByStudentId(Long studentId);
 }

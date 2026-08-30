@@ -1,0 +1,342 @@
+/* StudentAnswerPaperModal.css - Professor Answer Sheet Inspection Portal */
+
+.paper-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    animation: fadeInOverlay 0.25s ease-out;
+}
+
+.paper-modal-container {
+    width: 100%;
+    max-width: 1100px;
+    height: 92vh;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.paper-modal-header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: #ffffff;
+    padding: 1.25rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid #334155;
+}
+
+.paper-modal-header h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    color: #f8fafc;
+}
+
+.paper-modal-header p {
+    font-size: 0.88rem;
+    color: #94a3b8;
+    margin: 0;
+}
+
+.paper-close-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: none;
+    font-size: 1.5rem;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.paper-close-btn:hover {
+    background: rgba(239, 68, 68, 0.8);
+}
+
+.paper-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+    background: #f8fafc;
+}
+
+/* META BANNER */
+.paper-meta-banner {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.student-profile-summary {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.student-avatar-badge {
+    font-size: 2.5rem;
+    background: #eff6ff;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #93c5fd;
+}
+
+.student-details-col h3 {
+    margin: 0 0 4px 0;
+    font-size: 1.25rem;
+    color: #0f172a;
+}
+
+.student-details-col p {
+    margin: 2px 0;
+    font-size: 0.88rem;
+    color: #475569;
+}
+
+.paper-score-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #f1f5f9;
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    border: 1px solid #cbd5e1;
+}
+
+.score-stat-item {
+    display: flex;
+    flex-direction: column;
+    padding: 0 10px;
+    border-right: 1px solid #cbd5e1;
+}
+
+.score-stat-item:last-child {
+    border-right: none;
+}
+
+.score-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    color: #64748b;
+    font-weight: 700;
+}
+
+.score-val {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.score-val.highlight {
+    color: #2563eb;
+}
+
+.score-time {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #334155;
+}
+
+/* QUESTION BREAKDOWN */
+.paper-questions-section h3 {
+    font-size: 1.15rem;
+    color: #0f172a;
+    margin-bottom: 1.25rem;
+}
+
+.paper-q-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.paper-q-card.q-correct {
+    border-left: 5px solid #10b981;
+}
+
+.paper-q-card.q-incorrect {
+    border-left: 5px solid #ef4444;
+}
+
+.q-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.q-title-row {
+    display: flex;
+    gap: 10px;
+}
+
+.q-number {
+    font-weight: 800;
+    color: #2563eb;
+    font-size: 1.1rem;
+}
+
+.q-text-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #0f172a;
+    line-height: 1.5;
+}
+
+.q-header-badges {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+}
+
+.q-marks-tag {
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.q-status-pill {
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+.q-status-pill.correct {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.q-status-pill.incorrect {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* OPTIONS GRID IN PAPER */
+.paper-options-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.paper-option-item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+}
+
+.paper-option-item.student-choice {
+    border-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.paper-option-item.is-correct-opt {
+    border-color: #10b981;
+    background: #ecfdf5;
+}
+
+.paper-option-item.student-choice.is-correct-opt {
+    border-color: #10b981;
+    background: #d1fae5;
+}
+
+.opt-label {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: #334155;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+}
+
+.opt-text {
+    font-size: 0.98rem;
+    color: #1e293b;
+    font-weight: 500;
+    flex: 1;
+}
+
+.opt-tags {
+    display: flex;
+    gap: 6px;
+}
+
+.student-choice-tag {
+    background: #2563eb;
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.correct-opt-tag {
+    background: #059669;
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.paper-modal-footer {
+    padding: 1rem 2rem;
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.paper-btn-secondary {
+    background: #334155;
+    color: white;
+    border: none;
+    padding: 0.7rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+}

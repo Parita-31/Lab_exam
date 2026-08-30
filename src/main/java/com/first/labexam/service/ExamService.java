@@ -13,10 +13,8 @@ import com.first.labexam.enums.ExamStatus;
 import com.first.labexam.repository.ExamAttemptRepository;
 import com.first.labexam.repository.ExamRepository;
 import com.first.labexam.repository.UserRepository;
-
-import jakarta.transaction.Transactional;
-
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,6 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional(readOnly = true)
 public class ExamService {
 
     private final ExamRepository examRepository;
