@@ -8,7 +8,13 @@ import AIExamGenerator from "./pages/Professor/AIExamGenerator";
 import ManualExamBuilder from "./pages/Professor/ManualExamBuilder";
 import ProfessorExamsPage from "./pages/Professor/ProfessorExamsPage";
 import StudentExamsPage from "./pages/Student/StudentExamsPage";
+import StudentSettings from "./pages/Student/StudentSettings";
+import StudentProfile from "./pages/Student/StudentProfile";
+import ProfessorSettings from "./pages/Professor/ProfessorSettings";
+import ProfessorProfile from "./pages/Professor/ProfessorProfile";
 import GenericPage from "./pages/GenericPage";
+import ProfessorAttendance from "./pages/Professor/ProfessorAttendance";
+import StudentAttendance from "./pages/Student/StudentAttendance";
 
 function App() {
     return (
@@ -25,9 +31,9 @@ function App() {
                 <Route path="/student/past-exams" element={<StudentExamsPage defaultCategory="PAST" />} />
                 <Route path="/student/results" element={<GenericPage title="Final Results" role="STUDENT" />} />
                 <Route path="/student/ai-review" element={<GenericPage title="AI Review" role="STUDENT" />} />
-                <Route path="/student/attendance" element={<GenericPage title="Attendance" role="STUDENT" />} />
-                <Route path="/student/profile" element={<GenericPage title="Profile" role="STUDENT" />} />
-                <Route path="/student/settings" element={<GenericPage title="Settings" role="STUDENT" />} />
+                <Route path="/student/attendance" element={<StudentAttendance />} />
+                <Route path="/student/profile" element={<StudentProfile />} />
+                <Route path="/student/settings" element={<StudentSettings />} />
 
                 {/* Professor Routes */}
                 <Route path="/professor/dashboard" element={<ProfessorDashboard />} />
@@ -39,9 +45,9 @@ function App() {
                 <Route path="/professor/past-exams" element={<ProfessorExamsPage defaultCategory="PAST" />} />
                 <Route path="/professor/ai-evaluation" element={<GenericPage title="AI Evaluation" role="PROFESSOR" />} />
                 <Route path="/professor/results" element={<GenericPage title="Final Results" role="PROFESSOR" />} />
-                <Route path="/professor/attendance" element={<GenericPage title="Attendance" role="PROFESSOR" />} />
-                <Route path="/professor/profile" element={<GenericPage title="Profile" role="PROFESSOR" />} />
-                <Route path="/professor/settings" element={<GenericPage title="Settings" role="PROFESSOR" />} />
+                <Route path="/professor/attendance" element={<ProfessorAttendance />} />
+                <Route path="/professor/profile" element={<ProfessorProfile />} />
+                <Route path="/professor/settings" element={<ProfessorSettings />} />
             </Routes>
         </BrowserRouter>
     );

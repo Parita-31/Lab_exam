@@ -17,13 +17,12 @@ public class PasswordGenerator implements CommandLineRunner {
 
     public void run(String... args) {
 
-        String hash = passwordEncoder.encode("garima123");
+        String hash = passwordEncoder.encode("trushi");
 
         System.out.println("student hash: " + hash);
 
         System.out.println(
                 "MATCH TEST = " +
-                        passwordEncoder.matches("garima123", hash)
-        );
+                        passwordEncoder.matches("trushi", hash));
     }
 }

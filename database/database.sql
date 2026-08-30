@@ -78,3 +78,15 @@ CREATE TABLE IF NOT EXISTS exam_results (
 
     CONSTRAINT check_result_status CHECK (status IN ('PENDING', 'EVALUATED', 'PUBLISHED'))
     );
+
+
+CREATE TABLE IF NOT EXISTS attendance (
+    id BIGSERIAL PRIMARY KEY,
+    student_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    exam_id BIGINT NOT NULL REFERENCES exams(id) ON DELETE CASCADE,
+    attendance_date DATE,
+    status VARCHAR(20) NOT NULL,
+
+    CONSTRAINT check_attendance_status CHECK (status IN ('PRESENT', 'ABSENT')),
+    CONSTRAINT uk_attendance_student_exam_date UNIQUE (student_id, exam_id, attendance_date)
+);

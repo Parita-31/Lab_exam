@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
+import TakeExamModal from "../../components/TakeExamModal";
 import {
     getExamCategory,
     formatExamDate,
@@ -14,7 +15,6 @@ function StudentExamsPage({ defaultCategory = "UPCOMING" }) {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Determine initial tab category based on URL path or prop
     const getInitialCategory = () => {
         const path = location.pathname;
         if (path.includes("upcoming-exams")) return "UPCOMING";
@@ -30,8 +30,8 @@ function StudentExamsPage({ defaultCategory = "UPCOMING" }) {
     const [searchQuery, setSearchQuery] = useState("");
     const [studentData, setStudentData] = useState(null);
 
-    // Selected exam details for modal viewer
     const [selectedExamDetails, setSelectedExamDetails] = useState(null);
+    const [activeAttemptExamId, setActiveAttemptExamId] = useState(null);
 
     useEffect(() => {
         setActiveTab(getInitialCategory());
@@ -58,7 +58,6 @@ function StudentExamsPage({ defaultCategory = "UPCOMING" }) {
             setStudentData(user);
             setLoading(true);
 
-            // Fetch all published exams for student's batch
             fetch(`http://localhost:8080/api/student/${studentId}/exams?status=ALL`)
                 .then((res) => {
                     if (!res.ok) throw new Error("Failed to fetch student exams");
@@ -95,17 +94,15 @@ function StudentExamsPage({ defaultCategory = "UPCOMING" }) {
             });
     };
 
-    const handleStartExam = (exam) => {
-        alert(`Starting exam: "${exam.title}". Good luck!`);
-        // Navigate or start attempt handler can be connected here
+    const handleStartExam = (examId) => {
+        setSelectedExamDetails(null);
+        setActiveAttemptExamId(examId);
     };
 
-    // Categorize student exams
     const upcomingExams = allExams.filter((e) => getExamCategory(e) === "UPCOMING");
     const activeExams = allExams.filter((e) => getExamCategory(e) === "ACTIVE");
     const pastExams = allExams.filter((e) => getExamCategory(e) === "PAST");
 
-    // Filter displayed list based on active tab & search
     const getDisplayedExams = () => {
         let baseList = [];
         if (activeTab === "UPCOMING") baseList = upcomingExams;
@@ -131,7 +128,6 @@ function StudentExamsPage({ defaultCategory = "UPCOMING" }) {
                 <Sidebar role="STUDENT" />
 
                 <main className="exams-content-body">
-                    {/* PAGE HEADER */}
                     <div className="exams-header">
                         <div className="exams-header-info">
                             <h1>
@@ -152,7 +148,6 @@ function StudentExamsPage({ defaultCategory = "UPCOMING" }) {
                         </div>
                     </div>
 
-                    {/* CATEGORY TAB BAR */}
                     <div className="exam-tabs-bar">
                         <button
                             className={`exam-tab-btn ${activeTab === "UPCOMING" ? "active" : ""}`}
@@ -196,7 +191,6 @@ function StudentExamsPage({ defaultCategory = "UPCOMING" }) {
                         </button>
                     </div>
 
-                    {/* SEARCH CONTROL BAR */}
                     <div className="exams-controls-bar">
                         <div className="search-input-wrapper">
                             <span className="search-icon">🔍</span>
@@ -209,7 +203,6 @@ function StudentExamsPage({ defaultCategory = "UPCOMING" }) {
                         </div>
                     </div>
 
-                    {/* EXAM CARDS GRID */}
                     {loading ? (
                         <div className="empty-exams-container">
                             <p>Loading examinations...</p>
@@ -284,7 +277,7 @@ function StudentExamsPage({ defaultCategory = "UPCOMING" }) {
                                             {category === "ACTIVE" ? (
                                                 <button
                                                     className="action-btn-primary btn-start-live"
-                                                    onClick={() => handleStartExam(exam)}
+                                                    onClick={() => handleStartExam(exam.id)}
                                                 >
                                                     Start Exam Now →
                                                 </button>
@@ -351,10 +344,7 @@ function StudentExamsPage({ defaultCategory = "UPCOMING" }) {
                             {getExamCategory(selectedExamDetails) === "ACTIVE" && (
                                 <button
                                     className="action-btn-primary btn-start-live"
-                                    onClick={() => {
-                                        setSelectedExamDetails(null);
-                                        handleStartExam(selectedExamDetails);
-                                    }}
+                                    onClick={() => handleStartExam(selectedExamDetails.id)}
                                 >
                                     Start Exam Now →
                                 </button>
@@ -363,6 +353,18 @@ function StudentExamsPage({ defaultCategory = "UPCOMING" }) {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* LIVE EXAM ATTEMPT MODAL */}
+            {activeAttemptExamId && studentData && (
+                <TakeExamModal
+                    examId={activeAttemptExamId}
+                    studentId={studentData.id || studentData.userId}
+                    onClose={() => setActiveAttemptExamId(null)}
+                    onExamCompleted={() => {
+                        fetchStudentExams();
+                    }}
+                />
             )}
         </div>
     );

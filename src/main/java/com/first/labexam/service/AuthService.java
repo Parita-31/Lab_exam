@@ -65,19 +65,31 @@ public class AuthService {
             throw new RuntimeException("Invalid credentials");
         }
 
-        // Generate JWT token
+        // Generate JWT token with userId, email and role
         String token = jwtService.generateToken(
+                user.getId(),
                 user.getEmail(),
                 user.getRole()
         );
 
-        // Return login response
-        return new LoginResponse(
+        // Return login response with full user profile
+        LoginResponse response = new LoginResponse(
                 token,
                 user.getRole(),
                 user.getName(),
                 user.getId()
         );
+        response.setEmail(user.getEmail());
+        response.setDepartment(user.getDepartment());
+        response.setEnrollmentNumber(user.getEnrollmentNumber());
+        response.setBatch(user.getBatch());
+        response.setSemester(user.getSemester());
+        response.setProfileImage(user.getProfileImage());
+        response.setStatus(user.getStatus() != null ? user.getStatus() : "ACTIVE");
+        response.setCreatedAt(user.getCreatedAt() != null ? user.getCreatedAt().toString() : null);
+        response.setDesignation(user.getRole() != null && user.getRole().equalsIgnoreCase("PROFESSOR") ? "Associate Professor" : "Student");
+
+        return response;
     }
 
 

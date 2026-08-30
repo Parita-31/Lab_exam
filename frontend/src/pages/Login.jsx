@@ -44,6 +44,7 @@ function Login() {
 
             console.log("LOGIN RESPONSE:", data);
 
+            localStorage.clear();
             localStorage.setItem("user", JSON.stringify(data));
             localStorage.setItem("userId", String(data.userId));
             localStorage.setItem("token", data.token || "");

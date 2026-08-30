@@ -2,14 +2,21 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
+import StudentAnswerPaperModal from "../../components/StudentAnswerPaperModal";
 import { publishExam } from "../../Service/examService";
 import "./ProfessorDashboard.css";
 
 function ProfessorDashboard() {
     const navigate = useNavigate();
     const [dashboard, setDashboard] = useState(null);
+    const [professorId, setProfessorId] = useState(null);
     const [error, setError] = useState("");
     const [publishingId, setPublishingId] = useState(null);
+
+    // Submissions state
+    const [submissions, setSubmissions] = useState([]);
+    const [loadingSubmissions, setLoadingSubmissions] = useState(false);
+    const [selectedPaperData, setSelectedPaperData] = useState(null); // { examId, studentId }
 
     const fetchDashboardData = () => {
         try {
@@ -27,14 +34,16 @@ function ProfessorDashboard() {
                 return;
             }
 
-            const professorId = user.id || user.userId;
+            const id = user.id || user.userId;
 
-            if (!professorId) {
+            if (!id) {
                 setError("Professor ID is missing");
                 return;
             }
 
-            fetch(`http://localhost:8080/api/professor/dashboard/${professorId}`, {
+            setProfessorId(id);
+
+            fetch(`http://localhost:8080/api/professor/dashboard/${id}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -53,6 +62,23 @@ function ProfessorDashboard() {
                 .catch(err => {
                     console.error("Dashboard error:", err);
                     setError(err.message);
+                });
+
+            // Fetch submissions for this professor's exams
+            setLoadingSubmissions(true);
+            fetch(`http://localhost:8080/api/professor/${id}/submissions`)
+                .then((res) => {
+                    if (!res.ok) throw new Error("Failed to load student submissions");
+                    return res.json();
+                })
+                .then((subData) => {
+                    setSubmissions(subData || []);
+                })
+                .catch((err) => {
+                    console.error("Submissions error:", err);
+                })
+                .finally(() => {
+                    setLoadingSubmissions(false);
                 });
         } catch (err) {
             console.error("User data error:", err);
@@ -79,6 +105,18 @@ function ProfessorDashboard() {
             alert(err.message || "Failed to publish exam.");
         } finally {
             setPublishingId(null);
+        }
+    };
+
+    const formatDate = (dateStr) => {
+        if (!dateStr) return "N/A";
+        try {
+            return new Date(dateStr).toLocaleString("en-US", {
+                dateStyle: "medium",
+                timeStyle: "short"
+            });
+        } catch (e) {
+            return dateStr;
         }
     };
 
@@ -125,7 +163,7 @@ function ProfessorDashboard() {
                         <div>
                             <h1 className="dashboard-title">Welcome, {dashboard.name}</h1>
                             <p className="dashboard-subtitle">
-                                {dashboard.department ? `${dashboard.department} Department • ` : ""}Professor Overview
+                                {dashboard.department ? `${dashboard.department} Department • ` : ""}Faculty Examination Portal
                             </p>
                         </div>
                         <button
@@ -139,7 +177,7 @@ function ProfessorDashboard() {
                     {/* METRIC CARDS */}
                     <div className="dashboard-cards">
                         <div className="dashboard-card primary">
-                            <h3>Total Exams</h3>
+                            <h3>Total Exams Created</h3>
                             <p>{dashboard.totalExams || 0}</p>
                         </div>
 
@@ -166,10 +204,71 @@ function ProfessorDashboard() {
                             onClick={() => navigate("/professor/past-exams")}
                             style={{ cursor: "pointer" }}
                         >
-                            <h3>Past Exams</h3>
-                            <p>{dashboard.pastExamsCount || 0}</p>
+                            <h3>Submitted Papers</h3>
+                            <p>{submissions.length}</p>
                         </div>
                     </div>
+
+                    {/* STUDENT ANSWER PAPERS SECTION */}
+                    <section className="dashboard-section">
+                        <div className="section-header">
+                            <h2>📝 Submitted Student Answer Papers (Exams Created by You)</h2>
+                        </div>
+                        <p className="section-sub">Inspect individual student answer sheets, question responses, and scores.</p>
+
+                        {loadingSubmissions ? (
+                            <div className="empty-state">Loading student submissions...</div>
+                        ) : submissions.length === 0 ? (
+                            <div className="empty-state">
+                                <p>No student submissions received yet for your exams.</p>
+                            </div>
+                        ) : (
+                            <div className="exam-table-container">
+                                <table className="exam-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Student Name</th>
+                                            <th>Enrollment</th>
+                                            <th>Batch</th>
+                                            <th>Exam Title</th>
+                                            <th>Subject</th>
+                                            <th>Score</th>
+                                            <th>Percentage</th>
+                                            <th>Submitted At</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {submissions.map((sub, idx) => (
+                                            <tr key={idx}>
+                                                <td className="font-semibold">{sub.studentName}</td>
+                                                <td>{sub.enrollmentNumber || "N/A"}</td>
+                                                <td><span className="badge badge-batch">{sub.studentBatch || sub.examBatch}</span></td>
+                                                <td>{sub.examTitle}</td>
+                                                <td>{sub.subject}</td>
+                                                <td className="font-semibold">{sub.marksObtained} / {sub.totalMarks}</td>
+                                                <td>
+                                                    <span className={`status-tag status-${(sub.status || "").toLowerCase()}`}>
+                                                        {sub.percentage}% ({sub.status})
+                                                    </span>
+                                                </td>
+                                                <td>{formatDate(sub.submittedAt)}</td>
+                                                <td>
+                                                    <button
+                                                        className="publish-action-btn"
+                                                        style={{ background: "#2563eb" }}
+                                                        onClick={() => setSelectedPaperData({ examId: sub.examId, studentId: sub.studentId })}
+                                                    >
+                                                        Inspect Answer Paper 🔍
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </section>
 
                     {/* ACTIVE & UPCOMING EXAMS SECTION */}
                     <section className="dashboard-section">
@@ -181,12 +280,6 @@ function ProfessorDashboard() {
                          (!dashboard.upcomingExams || dashboard.upcomingExams.length === 0) ? (
                             <div className="empty-state">
                                 <p>No active or upcoming exams scheduled right now.</p>
-                                <button
-                                    className="secondary-btn"
-                                    onClick={() => navigate("/professor/create-exam")}
-                                >
-                                    Create Your First Exam
-                                </button>
                             </div>
                         ) : (
                             <div className="exam-table-container">
@@ -283,6 +376,16 @@ function ProfessorDashboard() {
                     </section>
                 </main>
             </div>
+
+            {/* STUDENT ANSWER PAPER INSPECTION MODAL */}
+            {selectedPaperData && (
+                <StudentAnswerPaperModal
+                    professorId={professorId}
+                    examId={selectedPaperData.examId}
+                    studentId={selectedPaperData.studentId}
+                    onClose={() => setSelectedPaperData(null)}
+                />
+            )}
         </div>
     );
 }

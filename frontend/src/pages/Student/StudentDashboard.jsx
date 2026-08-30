@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
+import TakeExamModal from "../../components/TakeExamModal";
+import { getExamCategory, formatExamDate, formatExamTime } from "../../utils/examUtils";
 import "./StudentDashboard.css";
 
 function StudentDashboard() {
@@ -11,6 +13,9 @@ function StudentDashboard() {
     const [error, setError] = useState("");
     const [selectedExamDetails, setSelectedExamDetails] = useState(null);
     const [loadingDetails, setLoadingDetails] = useState(false);
+
+    // Active exam attempt state
+    const [activeAttemptExamId, setActiveAttemptExamId] = useState(null);
 
     useEffect(() => {
         try {
@@ -35,7 +40,7 @@ function StudentDashboard() {
         }
     }, []);
 
-    useEffect(() => {
+    const fetchDashboard = () => {
         if (!studentId) return;
 
         fetch(`http://localhost:8080/api/student/dashboard/${studentId}`)
@@ -53,6 +58,10 @@ function StudentDashboard() {
                 console.error("Dashboard fetch error:", err);
                 setError(err.message);
             });
+    };
+
+    useEffect(() => {
+        fetchDashboard();
     }, [studentId]);
 
     const handleViewExamDetails = (examId) => {
@@ -77,6 +86,11 @@ function StudentDashboard() {
 
     const closeModal = () => {
         setSelectedExamDetails(null);
+    };
+
+    const handleStartExam = (examId) => {
+        closeModal();
+        setActiveAttemptExamId(examId);
     };
 
     if (error) {
@@ -161,21 +175,37 @@ function StudentDashboard() {
                         </div>
                     </div>
 
-                    {/* ACTIVE EXAMS SECTION */}
-                    {activeList.length > 0 && (
-                        <section className="dashboard-section section-active">
-                            <h2>Active Exams Today</h2>
-                            <p className="section-sub">Exams available for attempt today.</p>
+                    {/* SECTION 1: ACTIVE EXAMS */}
+                    <section className="dashboard-section section-active">
+                        <div className="section-header-flex">
+                            <div>
+                                <h2>⚡ Active Exams Today</h2>
+                                <p className="section-sub">Exams live and available for immediate attempt for your batch.</p>
+                            </div>
+                        </div>
+
+                        {activeList.length === 0 ? (
+                            <div className="empty-exams">
+                                <p>⚡ No exams currently active for batch <strong>{dashboard.batch || "your batch"}</strong> at this moment.</p>
+                            </div>
+                        ) : (
                             <div className="exam-cards-grid">
                                 {activeList.map((exam) => (
                                     <div className="student-exam-card active-card" key={exam.id}>
                                         <div className="exam-card-badge status-published">ACTIVE NOW</div>
                                         <h3>{exam.title}</h3>
                                         <p className="exam-meta"><strong>Subject:</strong> {exam.subject}</p>
-                                        <p className="exam-meta"><strong>Time:</strong> {exam.startTime || "Scheduled"} ({exam.durationMinutes} mins)</p>
-                                        <p className="exam-meta"><strong>Marks:</strong> {exam.totalMarks}</p>
+                                        <p className="exam-meta">
+                                            <strong>Time:</strong> {formatExamTime(exam.startTime)} ({exam.durationMinutes} mins)
+                                        </p>
+                                        <p className="exam-meta"><strong>Total Marks:</strong> {exam.totalMarks}</p>
                                         <div className="card-actions">
-                                            <button className="start-exam-btn">Start Exam Now →</button>
+                                            <button
+                                                className="start-exam-btn"
+                                                onClick={() => handleStartExam(exam.id)}
+                                            >
+                                                Start Exam Now →
+                                            </button>
                                             <button
                                                 className="view-details-btn"
                                                 onClick={() => handleViewExamDetails(exam.id)}
@@ -186,13 +216,13 @@ function StudentDashboard() {
                                     </div>
                                 ))}
                             </div>
-                        </section>
-                    )}
+                        )}
+                    </section>
 
-                    {/* UPCOMING EXAMS SECTION */}
+                    {/* SECTION 2: UPCOMING EXAMS */}
                     <section className="dashboard-section">
-                        <h2>Upcoming Scheduled Exams</h2>
-                        <p className="section-sub">Exams scheduled for upcoming dates for your batch.</p>
+                        <h2>📋 Upcoming Scheduled Exams</h2>
+                        <p className="section-sub">Exams scheduled for future dates for batch <strong>{dashboard.batch || "all batches"}</strong>.</p>
 
                         {upcomingList.length === 0 ? (
                             <div className="empty-exams">
@@ -219,8 +249,8 @@ function StudentDashboard() {
                                                 <td className="font-semibold">{exam.title}</td>
                                                 <td>{exam.subject}</td>
                                                 <td><span className="badge badge-batch">{exam.batch}</span></td>
-                                                <td>{exam.examDate}</td>
-                                                <td>{exam.startTime || "TBA"}</td>
+                                                <td>{formatExamDate(exam.examDate)}</td>
+                                                <td>{formatExamTime(exam.startTime)}</td>
                                                 <td>{exam.durationMinutes} mins</td>
                                                 <td>{exam.totalMarks}</td>
                                                 <td>
@@ -239,10 +269,16 @@ function StudentDashboard() {
                         )}
                     </section>
 
-                    {/* PAST / COMPLETED EXAMS */}
-                    {pastList.length > 0 && (
-                        <section className="dashboard-section">
-                            <h2>Past Exams</h2>
+                    {/* SECTION 3: PAST EXAMS */}
+                    <section className="dashboard-section">
+                        <h2>📜 Past & Completed Exams</h2>
+                        <p className="section-sub">Past examinations that have concluded for your batch.</p>
+
+                        {pastList.length === 0 ? (
+                            <div className="empty-exams">
+                                <p>No past exams recorded for batch <strong>{dashboard.batch || "all batches"}</strong>.</p>
+                            </div>
+                        ) : (
                             <div className="exam-table-container">
                                 <table className="student-exam-table">
                                     <thead>
@@ -262,7 +298,7 @@ function StudentDashboard() {
                                                 <td className="font-semibold">{exam.title}</td>
                                                 <td>{exam.subject}</td>
                                                 <td><span className="badge badge-batch">{exam.batch}</span></td>
-                                                <td>{exam.examDate}</td>
+                                                <td>{formatExamDate(exam.examDate)}</td>
                                                 <td>{exam.durationMinutes} mins</td>
                                                 <td>{exam.totalMarks}</td>
                                                 <td>
@@ -278,8 +314,8 @@ function StudentDashboard() {
                                     </tbody>
                                 </table>
                             </div>
-                        </section>
-                    )}
+                        )}
+                    </section>
                 </main>
             </div>
 
@@ -296,8 +332,8 @@ function StudentDashboard() {
                                 <div><strong>Subject:</strong> {selectedExamDetails.subject}</div>
                                 <div><strong>Batch:</strong> {selectedExamDetails.batch}</div>
                                 <div><strong>Semester:</strong> {selectedExamDetails.semester || 1}</div>
-                                <div><strong>Exam Date:</strong> {selectedExamDetails.examDate}</div>
-                                <div><strong>Start Time:</strong> {selectedExamDetails.startTime || "TBA"}</div>
+                                <div><strong>Exam Date:</strong> {formatExamDate(selectedExamDetails.examDate)}</div>
+                                <div><strong>Start Time:</strong> {formatExamTime(selectedExamDetails.startTime)}</div>
                                 <div><strong>Duration:</strong> {selectedExamDetails.durationMinutes} Minutes</div>
                                 <div><strong>Total Marks:</strong> {selectedExamDetails.totalMarks}</div>
                                 <div><strong>Status:</strong> <span className="status-tag status-published">{selectedExamDetails.status}</span></div>
@@ -327,10 +363,30 @@ function StudentDashboard() {
                             )}
                         </div>
                         <div className="modal-footer">
+                            {getExamCategory(selectedExamDetails) === "ACTIVE" && (
+                                <button
+                                    className="start-exam-btn"
+                                    onClick={() => handleStartExam(selectedExamDetails.id)}
+                                >
+                                    Start Exam Now →
+                                </button>
+                            )}
                             <button className="secondary-btn" onClick={closeModal}>Close</button>
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* LIVE EXAM ATTEMPT MODAL */}
+            {activeAttemptExamId && (
+                <TakeExamModal
+                    examId={activeAttemptExamId}
+                    studentId={studentId}
+                    onClose={() => setActiveAttemptExamId(null)}
+                    onExamCompleted={() => {
+                        fetchDashboard();
+                    }}
+                />
             )}
         </div>
     );

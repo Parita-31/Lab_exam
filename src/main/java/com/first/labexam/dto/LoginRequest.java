@@ -14,6 +14,11 @@ public class LoginRequest {
     public LoginRequest() {
     }
 
+    public LoginRequest(String identifier, String password) {
+        this.identifier = identifier;
+        this.password = password;
+    }
+
     public String getIdentifier() {
         return identifier;
     }

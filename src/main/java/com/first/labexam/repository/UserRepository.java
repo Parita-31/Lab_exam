@@ -15,4 +15,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     long countByRole(String role);
 
     long countByRoleAndBatch(String role, String batch);
+
+    java.util.List<User> findByRole(String role);
+
+    java.util.List<User> findByRoleAndBatch(String role, String batch);
+
+    java.util.List<User> findByRoleAndBatchIgnoreCase(String role, String batch);
 }

@@ -26,10 +26,10 @@ public class JwtService {
         );
     }
 
-    public String generateToken(String email, String role) {
-
+    public String generateToken(Long userId, String email, String role) {
         return Jwts.builder()
                 .subject(email)
+                .claim("userId", userId)
                 .claim("role", role)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION))
@@ -37,14 +37,24 @@ public class JwtService {
                 .compact();
     }
 
-    public String extractEmail(String token) {
+    public String generateToken(String email, String role) {
+        return generateToken(null, email, role);
+    }
 
+    public String extractEmail(String token) {
         return getClaims(token)
                 .getSubject();
     }
 
-    public String extractRole(String token) {
+    public Long extractUserId(String token) {
+        Object userIdClaim = getClaims(token).get("userId");
+        if (userIdClaim instanceof Number) {
+            return ((Number) userIdClaim).longValue();
+        }
+        return null;
+    }
 
+    public String extractRole(String token) {
         return getClaims(token)
                 .get("role", String.class);
     }
