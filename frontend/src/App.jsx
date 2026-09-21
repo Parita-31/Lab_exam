@@ -15,6 +15,7 @@ import ProfessorProfile from "./pages/Professor/ProfessorProfile";
 import GenericPage from "./pages/GenericPage";
 import ProfessorAttendance from "./pages/Professor/ProfessorAttendance";
 import StudentAttendance from "./pages/Student/StudentAttendance";
+import ReviewQue from "./pages/Professor/ReviewQue";
 
 function App() {
     return (
@@ -48,6 +49,7 @@ function App() {
                 <Route path="/professor/attendance" element={<ProfessorAttendance />} />
                 <Route path="/professor/profile" element={<ProfessorProfile />} />
                 <Route path="/professor/settings" element={<ProfessorSettings />} />
+                <Route path="/professor/create-exam/review" element={<ReviewQue />} />
             </Routes>
         </BrowserRouter>
     );

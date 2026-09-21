@@ -6,420 +6,567 @@ import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 
 function AIExamGenerator() {
-
     const location = useLocation();
     const navigate = useNavigate();
 
     const examDetails = location.state || {};
 
     const [formData, setFormData] = useState({
-        topic: "",
-        numberOfQuestions: 10,
-        questionTypes: [],
-        difficulty: "MEDIUM",
-        totalMarks: examDetails.totalMarks || 100,
-        includeCoding: false,
-        includeScenario: true
+        numberOfSets: 4,
+        topics: [
+            {
+                name: "",
+                questionType: "CODE",
+                difficulty: "MEDIUM",
+                instructions: ""
+            }
+        ]
     });
 
     const [loading, setLoading] = useState(false);
 
-    const handleChange = (e) => {
-
-        const { name, value, type, checked } = e.target;
-
-        setFormData(previous => ({
+    // Handle changes for number of sets
+    const handleSetCountChange = (e) => {
+        setFormData((previous) => ({
             ...previous,
-            [name]: type === "checkbox" ? checked : value
+            numberOfSets: Number(e.target.value)
         }));
     };
 
-    const handleQuestionType = (type) => {
+    // Handle changes inside a topic
+    const handleTopicChange = (index, field, value) => {
+        setFormData((previous) => {
+            const updatedTopics = [...previous.topics];
 
-        setFormData(previous => {
-
-            const exists =
-                previous.questionTypes.includes(type);
+            updatedTopics[index] = {
+                ...updatedTopics[index],
+                [field]: value
+            };
 
             return {
                 ...previous,
-                questionTypes: exists
-                    ? previous.questionTypes.filter(
-                        item => item !== type
-                    )
-                    : [...previous.questionTypes, type]
+                topics: updatedTopics
             };
         });
     };
 
-    const handleGenerate = async (e) => {
+    // Add a new topic
+    const handleAddTopic = () => {
+        setFormData((previous) => ({
+            ...previous,
+            topics: [
+                ...previous.topics,
+                {
+                    name: "",
+                    questionType: "CODE",
+                    difficulty: "MEDIUM",
+                    instructions: ""
+                }
+            ]
+        }));
+    };
 
-        e.preventDefault();
-
-        if (!formData.topic.trim()) {
-            alert("Please enter the topic.");
+    // Remove a topic
+    const handleRemoveTopic = (index) => {
+        if (formData.topics.length === 1) {
+            alert("At least one topic is required.");
             return;
         }
 
-        if (formData.questionTypes.length === 0) {
-            alert("Please select at least one question type.");
+        setFormData((previous) => ({
+            ...previous,
+            topics: previous.topics.filter((_, i) => i !== index)
+        }));
+    };
+
+    // Generate question sets
+    const handleGenerate = async (e) => {
+        e.preventDefault();
+
+        // Validate number of sets
+        if (
+            !formData.numberOfSets ||
+            formData.numberOfSets < 1 ||
+            formData.numberOfSets > 20
+        ) {
+            alert("Please select between 1 and 20 question sets.");
+            return;
+        }
+
+        // Validate topics
+        const invalidTopic = formData.topics.some(
+            (topic) => !topic.name.trim()
+        );
+
+        if (invalidTopic) {
+            alert("Please enter a name for every topic.");
             return;
         }
 
         setLoading(true);
 
         /*
-         * Backend AI API will be connected here later.
+         * AI backend API will be connected here.
          *
-         * Example:
+         * Example request:
          *
          * POST /api/professor/exams/generate
+         *
+         * {
+         *   subject: examDetails.subject,
+         *   numberOfSets: formData.numberOfSets,
+         *   topics: formData.topics
+         * }
+         *
+         * For now, we pass the configuration to the review page.
          */
 
-        setTimeout(() => {
+        try {
+            const token = localStorage.getItem("token");
 
-            setLoading(false);
-
-            navigate(
-                "/professor/create-exam/review",
+            const response = await fetch(
+                "http://localhost:8080/api/professor/ai/generate",
                 {
-                    state: {
-                        examDetails,
-                        generatorSettings: formData
-                    }
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        ...(token
+                            ? { Authorization: `Bearer ${token}` }
+                            : {})
+                    },
+                    body: JSON.stringify({
+                        subject: examDetails.subject,
+                        numberOfSets: formData.numberOfSets,
+                        topics: formData.topics
+                    })
                 }
             );
 
-        }, 1000);
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(
+                    errorText || "Failed to generate questions"
+                );
+            }
+
+            const generatedQuestions = await response.json();
+
+            navigate("/professor/create-exam/review", {
+                state: {
+                    examDetails,
+                    generatorSettings: formData,
+                    generatedQuestions
+                }
+            });
+
+        } catch (error) {
+            console.error("AI generation error:", error);
+
+            alert(
+                error.message ||
+                "Something went wrong while generating questions."
+            );
+
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "#f1f5f9" }}>
+        <div
+            style={{
+                minHeight: "100vh",
+                display: "flex",
+                flexDirection: "column",
+                background: "#f1f5f9"
+            }}
+        >
             <Navbar />
+
             <div style={{ display: "flex", flex: 1 }}>
                 <Sidebar role="PROFESSOR" />
-                <main className="dashboard-content" style={{ flex: 1 }}>
+
+                <main
+                    className="dashboard-content"
+                    style={{ flex: 1 }}
+                >
                     <div className="ai-generator-container">
 
-                <div className="ai-generator-header">
+                        {/* HEADER */}
+                        <div className="ai-generator-header">
 
-                    <button
-                        className="back-button"
-                        onClick={() =>
-                            navigate(
-                                "/professor/create-exam",
-                                {
-                                    state: examDetails
+                            <button
+                                className="back-button"
+                                onClick={() =>
+                                    navigate(
+                                        "/professor/create-exam",
+                                        {
+                                            state: examDetails
+                                        }
+                                    )
                                 }
-                            )
-                        }
-                    >
-                        ← Back
-                    </button>
+                            >
+                                ← Back
+                            </button>
 
-                    <div>
-                        <h1>AI Exam Generator</h1>
+                            <div>
+                                <h1>AI Exam Generator</h1>
 
-                        <p>
-                            Configure how AI should generate your
-                            examination questions.
-                        </p>
-                    </div>
-
-                </div>
-
-
-                {/* EXAM INFORMATION */}
-
-                <div className="exam-info-card">
-
-                    <h2>Exam Information</h2>
-
-                    <div className="exam-info-grid">
-
-                        <div>
-                            <span>Subject</span>
-                            <strong>
-                                {examDetails.subject || "Not selected"}
-                            </strong>
-                        </div>
-
-                        <div>
-                            <span>Batch</span>
-                            <strong>
-                                {examDetails.batch || "Not selected"}
-                            </strong>
-                        </div>
-
-                        <div>
-                            <span>Semester</span>
-                            <strong>
-                                {examDetails.semester || "Not selected"}
-                            </strong>
-                        </div>
-
-                        <div>
-                            <span>Total Marks</span>
-                            <strong>
-                                {examDetails.totalMarks || "Not selected"}
-                            </strong>
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <form
-                    className="ai-generator-form"
-                    onSubmit={handleGenerate}
-                >
-
-                    {/* TOPIC */}
-
-                    <div className="form-group">
-
-                        <label>
-                            Topic
-                        </label>
-
-                        <textarea
-                            name="topic"
-                            value={formData.topic}
-                            onChange={handleChange}
-                            placeholder={
-                                "Example: Merge Sort, Binary Search, " +
-                                "Time Complexity"
-                            }
-                            rows="4"
-                            required
-                        />
-
-                        <small>
-                            Enter one or more topics. You can also
-                            describe the concept you want the AI to focus on.
-                        </small>
-
-                    </div>
-
-
-                    {/* NUMBER */}
-
-                    <div className="form-group">
-
-                        <label>
-                            Number of Questions
-                        </label>
-
-                        <input
-                            type="number"
-                            name="numberOfQuestions"
-                            min="1"
-                            max="100"
-                            value={formData.numberOfQuestions}
-                            onChange={handleChange}
-                        />
-
-                    </div>
-
-
-                    {/* QUESTION TYPES */}
-
-                    <div className="form-group">
-
-                        <label>
-                            Question Types
-                        </label>
-
-                        <div className="checkbox-grid">
-
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    checked={formData.questionTypes.includes(
-                                        "MCQ"
-                                    )}
-                                    onChange={() =>
-                                        handleQuestionType("MCQ")
-                                    }
-                                />
-                                Multiple Choice
-                            </label>
-
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    checked={formData.questionTypes.includes(
-                                        "SHORT"
-                                    )}
-                                    onChange={() =>
-                                        handleQuestionType("SHORT")
-                                    }
-                                />
-                                Short Answer
-                            </label>
-
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    checked={formData.questionTypes.includes(
-                                        "LONG"
-                                    )}
-                                    onChange={() =>
-                                        handleQuestionType("LONG")
-                                    }
-                                />
-                                Long Answer
-                            </label>
-
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    checked={formData.questionTypes.includes(
-                                        "CODE"
-                                    )}
-                                    onChange={() =>
-                                        handleQuestionType("CODE")
-                                    }
-                                />
-                                Coding Question
-                            </label>
-
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    checked={formData.questionTypes.includes(
-                                        "SCENARIO"
-                                    )}
-                                    onChange={() =>
-                                        handleQuestionType("SCENARIO")
-                                    }
-                                />
-                                Scenario Based
-                            </label>
-
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    checked={formData.questionTypes.includes(
-                                        "DEBUGGING"
-                                    )}
-                                    onChange={() =>
-                                        handleQuestionType("DEBUGGING")
-                                    }
-                                />
-                                Debugging
-                            </label>
+                                <p>
+                                    Configure topics, difficulty and question
+                                    types to generate multiple exam sets.
+                                </p>
+                            </div>
 
                         </div>
 
-                    </div>
+                        {/* EXAM INFORMATION */}
+                        <div className="exam-info-card">
 
+                            <h2>Exam Information</h2>
 
-                    {/* DIFFICULTY */}
+                            <div className="exam-info-grid">
 
-                    <div className="form-group">
+                                <div>
+                                    <span>Subject</span>
+                                    <strong>
+                                        {examDetails.subject ||
+                                            "Not selected"}
+                                    </strong>
+                                </div>
 
-                        <label>
-                            Difficulty
-                        </label>
+                                <div>
+                                    <span>Batch</span>
+                                    <strong>
+                                        {examDetails.batch ||
+                                            "Not selected"}
+                                    </strong>
+                                </div>
 
-                        <select
-                            name="difficulty"
-                            value={formData.difficulty}
-                            onChange={handleChange}
+                                <div>
+                                    <span>Semester</span>
+                                    <strong>
+                                        {examDetails.semester ||
+                                            "Not selected"}
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    <span>Total Marks</span>
+                                    <strong>
+                                        {examDetails.totalMarks ||
+                                            "Not selected"}
+                                    </strong>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        {/* GENERATOR FORM */}
+                        <form
+                            className="ai-generator-form"
+                            onSubmit={handleGenerate}
                         >
 
-                            <option value="EASY">
-                                Easy
-                            </option>
+                            {/* NUMBER OF SETS */}
+                            <div className="form-group">
 
-                            <option value="MEDIUM">
-                                Medium
-                            </option>
+                                <label htmlFor="numberOfSets">
+                                    Number of Question Sets
+                                </label>
 
-                            <option value="HARD">
-                                Hard
-                            </option>
+                                <input
+                                    id="numberOfSets"
+                                    type="number"
+                                    min="1"
+                                    max="20"
+                                    value={formData.numberOfSets}
+                                    onChange={handleSetCountChange}
+                                    required
+                                />
 
-                            <option value="MIXED">
-                                Mixed
-                            </option>
+                                <small>
+                                    Select how many different question sets
+                                    should be generated.
+                                </small>
 
-                        </select>
+                            </div>
+
+                            {/* TOPICS HEADER */}
+                            <div className="topics-header">
+
+                                <div>
+                                    <h2>Topics</h2>
+
+                                    <p>
+                                        Each topic will contribute one
+                                        question to every generated set.
+                                    </p>
+                                </div>
+
+                                <span className="question-count-badge">
+                                    {formData.topics.length}{" "}
+                                    {formData.topics.length === 1
+                                        ? "Question"
+                                        : "Questions"}{" "}
+                                    / Set
+                                </span>
+
+                            </div>
+
+                            {/* TOPIC CARDS */}
+                            <div className="topics-container">
+
+                                {formData.topics.map(
+                                    (topic, index) => (
+                                        <div
+                                            className="topic-card"
+                                            key={index}
+                                        >
+
+                                            {/* TOPIC CARD HEADER */}
+                                            <div className="topic-card-header">
+
+                                                <h3>
+                                                    Topic {index + 1}
+                                                </h3>
+
+                                                {formData.topics.length >
+                                                    1 && (
+                                                    <button
+                                                        type="button"
+                                                        className="remove-topic-button"
+                                                        onClick={() =>
+                                                            handleRemoveTopic(
+                                                                index
+                                                            )
+                                                        }
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                )}
+
+                                            </div>
+
+                                            {/* TOPIC NAME */}
+                                            <div className="form-group">
+
+                                                <label>
+                                                    Topic Name
+                                                </label>
+
+                                                <input
+                                                    type="text"
+                                                    value={topic.name}
+                                                    onChange={(e) =>
+                                                        handleTopicChange(
+                                                            index,
+                                                            "name",
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    placeholder="Example: Pattern Programming"
+                                                    required
+                                                />
+
+                                            </div>
+
+                                            {/* TYPE + DIFFICULTY */}
+                                            <div className="topic-settings-grid">
+
+                                                <div className="form-group">
+
+                                                    <label>
+                                                        Question Type
+                                                    </label>
+
+                                                    <select
+                                                        value={
+                                                            topic.questionType
+                                                        }
+                                                        onChange={(e) =>
+                                                            handleTopicChange(
+                                                                index,
+                                                                "questionType",
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                    >
+                                                        <option value="CODE">
+                                                            Coding
+                                                        </option>
+
+                                                        <option value="MCQ">
+                                                            Multiple Choice
+                                                        </option>
+
+                                                        <option value="SHORT">
+                                                            Short Answer
+                                                        </option>
+
+                                                        <option value="LONG">
+                                                            Long Answer
+                                                        </option>
+
+                                                        <option value="DEBUGGING">
+                                                            Debugging
+                                                        </option>
+
+                                                        <option value="SCENARIO">
+                                                            Scenario Based
+                                                        </option>
+                                                    </select>
+
+                                                </div>
+
+                                                <div className="form-group">
+
+                                                    <label>
+                                                        Difficulty
+                                                    </label>
+
+                                                    <select
+                                                        value={
+                                                            topic.difficulty
+                                                        }
+                                                        onChange={(e) =>
+                                                            handleTopicChange(
+                                                                index,
+                                                                "difficulty",
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                    >
+                                                        <option value="EASY">
+                                                            Easy
+                                                        </option>
+
+                                                        <option value="MEDIUM">
+                                                            Medium
+                                                        </option>
+
+                                                        <option value="HARD">
+                                                            Hard
+                                                        </option>
+                                                    </select>
+
+                                                </div>
+
+                                            </div>
+
+                                            {/* ADDITIONAL INSTRUCTIONS */}
+                                            <div className="form-group">
+
+                                                <label>
+                                                    Additional Instructions
+                                                    <span className="optional-label">
+                                                        {" "}
+                                                        (Optional)
+                                                    </span>
+                                                </label>
+
+                                                <textarea
+                                                    value={
+                                                        topic.instructions
+                                                    }
+                                                    onChange={(e) =>
+                                                        handleTopicChange(
+                                                            index,
+                                                            "instructions",
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    placeholder="Example: Use Java Swing and event handling. Avoid repeating common questions."
+                                                    rows="3"
+                                                />
+
+                                                <small>
+                                                    Give the AI any specific
+                                                    requirements for this
+                                                    topic.
+                                                </small>
+
+                                            </div>
+
+                                        </div>
+                                    )
+                                )}
+
+                            </div>
+
+                            {/* ADD TOPIC */}
+                            <button
+                                type="button"
+                                className="add-topic-button"
+                                onClick={handleAddTopic}
+                            >
+                                + Add Topic
+                            </button>
+
+                            {/* GENERATION INFO */}
+                            <div className="generation-info">
+
+                                <div className="generation-info-icon">
+                                    ✨
+                                </div>
+
+                                <div>
+                                    <strong>
+                                        What will be generated?
+                                    </strong>
+
+                                    <p>
+                                        {formData.numberOfSets} different
+                                        question sets with{" "}
+                                        {formData.topics.length} question
+                                        {formData.topics.length === 1
+                                            ? ""
+                                            : "s"}{" "}
+                                        in each set. Every set will follow
+                                        the selected topic, type and
+                                        difficulty requirements.
+                                    </p>
+                                </div>
+
+                            </div>
+
+                            {/* ACTIONS */}
+                            <div className="form-actions">
+
+                                <button
+                                    type="button"
+                                    className="cancel-button"
+                                    onClick={() =>
+                                        navigate(
+                                            "/professor/create-exam",
+                                            {
+                                                state: examDetails
+                                            }
+                                        )
+                                    }
+                                >
+                                    Cancel
+                                </button>
+
+                                <button
+                                    type="submit"
+                                    className="generate-button"
+                                    disabled={loading}
+                                >
+                                    {loading
+                                        ? "Generating..."
+                                        : "Generate Question Sets →"}
+                                </button>
+
+                            </div>
+
+                        </form>
 
                     </div>
-
-
-                    {/* OPTIONS */}
-
-                    <div className="additional-options">
-
-                        <label>
-
-                            <input
-                                type="checkbox"
-                                name="includeCoding"
-                                checked={formData.includeCoding}
-                                onChange={handleChange}
-                            />
-
-                            Include practical coding questions
-
-                        </label>
-
-
-                        <label>
-
-                            <input
-                                type="checkbox"
-                                name="includeScenario"
-                                checked={formData.includeScenario}
-                                onChange={handleChange}
-                            />
-
-                            Include real-world scenarios
-
-                        </label>
-
-                    </div>
-
-
-                    {/* ACTION */}
-
-                    <div className="form-actions">
-
-                        <button
-                            type="button"
-                            className="cancel-button"
-                            onClick={() =>
-                                navigate(
-                                    "/professor/create-exam"
-                                )
-                            }
-                        >
-                            Cancel
-                        </button>
-
-                        <button
-                            type="submit"
-                            className="generate-button"
-                            disabled={loading}
-                        >
-
-                            {loading
-                                ? "Generating..."
-                                : "Generate Questions →"
-                            }
-
-                        </button>
-
-                    </div>
-                </form>
+                </main>
             </div>
-        </main>
-    </div>
-</div>
+        </div>
     );
 }
 
