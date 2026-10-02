@@ -69,9 +69,7 @@ public class ProfessorService {
         User professor = userRepository.findById(professorId)
                 .orElseThrow(() -> new RuntimeException("Professor not found with ID: " + professorId));
 
-        if (professor.getRole() == null || !professor.getRole().equalsIgnoreCase("PROFESSOR")) {
-            throw new RuntimeException("Access denied: User " + professorId + " is not a professor");
-        }
+        validateProfessorOrHod(professor);
 
         LocalDateTime now = LocalDateTime.now();
 
@@ -259,9 +257,7 @@ public class ProfessorService {
         User user = userRepository.findById(professorId)
                 .orElseThrow(() -> new RuntimeException("Professor not found with ID: " + professorId));
 
-        if (user.getRole() == null || !user.getRole().equalsIgnoreCase("PROFESSOR")) {
-            throw new RuntimeException("Access denied: User " + professorId + " is not a professor");
-        }
+        validateProfessorOrHod(user);
 
         UserProfileResponse response = new UserProfileResponse(
                 user.getId(),
@@ -274,7 +270,7 @@ public class ProfessorService {
         response.setStatus(user.getStatus() != null ? user.getStatus() : "ACTIVE");
         response.setCreatedAt(user.getCreatedAt() != null ? user.getCreatedAt().toString() : null);
         response.setEnrollmentNumber(user.getEnrollmentNumber());
-        response.setDesignation(user.getRole() != null && user.getRole().equalsIgnoreCase("PROFESSOR") ? "Associate Professor" : "Faculty");
+        response.setDesignation("HOD".equalsIgnoreCase(user.getRole()) ? "Head of Department" : "Associate Professor");
         return response;
     }
 
@@ -287,9 +283,7 @@ public class ProfessorService {
         User user = userRepository.findById(professorId)
                 .orElseThrow(() -> new RuntimeException("Professor not found with ID: " + professorId));
 
-        if (user.getRole() == null || !user.getRole().equalsIgnoreCase("PROFESSOR")) {
-            throw new RuntimeException("Access denied: User " + professorId + " is not a professor");
-        }
+        validateProfessorOrHod(user);
 
         if (request.getName() != null && !request.getName().trim().isEmpty()) {
             user.setName(request.getName().trim());
@@ -320,7 +314,7 @@ public class ProfessorService {
         response.setStatus(savedUser.getStatus() != null ? savedUser.getStatus() : "ACTIVE");
         response.setCreatedAt(savedUser.getCreatedAt() != null ? savedUser.getCreatedAt().toString() : null);
         response.setEnrollmentNumber(savedUser.getEnrollmentNumber());
-        response.setDesignation(savedUser.getRole() != null && savedUser.getRole().equalsIgnoreCase("PROFESSOR") ? "Associate Professor" : "Faculty");
+        response.setDesignation("HOD".equalsIgnoreCase(savedUser.getRole()) ? "Head of Department" : "Associate Professor");
         return response;
     }
 
@@ -353,9 +347,7 @@ public class ProfessorService {
         User user = userRepository.findById(professorId)
                 .orElseThrow(() -> new RuntimeException("Professor not found with ID: " + professorId));
 
-        if (user.getRole() == null || !user.getRole().equalsIgnoreCase("PROFESSOR")) {
-            throw new RuntimeException("Access denied: User " + professorId + " is not a professor");
-        }
+        validateProfessorOrHod(user);
 
         // Check if current password is valid
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
@@ -365,6 +357,20 @@ public class ProfessorService {
         // Encode and save new password to PostgreSQL database
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
+    }
+
+    private void validateProfessorOrHod(User user) {
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+        String role = user.getRole() != null ? user.getRole().toUpperCase() : "";
+        if (!"PROFESSOR".equals(role) && !"HOD".equals(role)) {
+            throw new RuntimeException("Access denied: User is not a professor or HOD");
+        }
+        String status = user.getStatus() != null ? user.getStatus().toUpperCase() : "ACTIVE";
+        if (!"ACTIVE".equals(status)) {
+            throw new RuntimeException("Access denied: Account status is " + status + ". Only ACTIVE faculty can access this dashboard/feature.");
+        }
     }
 
     private List<ExamSummaryResponse> mapList(List<Exam> exams) {

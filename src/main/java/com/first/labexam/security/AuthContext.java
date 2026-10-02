@@ -28,4 +28,17 @@ public final class AuthContext {
         }
         return principal;
     }
+
+    public static CustomUserPrincipal requireAnyRole(String... expectedRoles) {
+        CustomUserPrincipal principal = requireAuthenticatedUser();
+        if (principal.getRole() == null) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+        for (String role : expectedRoles) {
+            if (principal.getRole().equalsIgnoreCase(role)) {
+                return principal;
+            }
+        }
+        throw new ApiException(HttpStatus.FORBIDDEN, "Access denied: Required role not possessed");
+    }
 }

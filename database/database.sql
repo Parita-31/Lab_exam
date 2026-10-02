@@ -13,8 +13,8 @@ CREATE TABLE IF NOT EXISTS users (
     status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT check_user_role CHECK (role IN ('STUDENT', 'PROFESSOR')),
-    CONSTRAINT check_user_status CHECK (status IN ('ACTIVE', 'INACTIVE'))
+    CONSTRAINT check_user_role CHECK (role IN ('STUDENT', 'PROFESSOR', 'HOD', 'ADMIN')),
+    CONSTRAINT check_user_status CHECK (status IN ('ACTIVE', 'INACTIVE', 'PENDING', 'REJECTED'))
     );
 
 

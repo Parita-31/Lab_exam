@@ -37,7 +37,8 @@ function Login() {
             );
 
             if (!response.ok) {
-                throw new Error("Invalid enrollment number/email or password.");
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.message || "Invalid enrollment number/email or password.");
             }
 
             const data = await response.json();
@@ -51,10 +52,17 @@ function Login() {
             localStorage.setItem("role", data.role || "");
             localStorage.setItem("name", data.name || "");
 
-            if (data.role === "STUDENT") {
-                navigate("/student/dashboard");
-            } else if (data.role === "PROFESSOR") {
+            const role = (data.role || "").toUpperCase();
+            if (role === "ADMIN") {
+                navigate("/admin/dashboard");
+            } else if (role === "HOD") {
+                navigate("/hod/dashboard");
+            } else if (role === "PROFESSOR") {
                 navigate("/professor/dashboard");
+            } else if (role === "STUDENT") {
+                navigate("/student/dashboard");
+            } else {
+                navigate("/login");
             }
 
         } catch (error) {
@@ -136,10 +144,23 @@ function Login() {
                 </form>
 
 
+                {/* Professor Registration Link */}
+
+                <div style={{ textAlign: "center", marginTop: "16px", fontSize: "14px", color: "#64748b" }}>
+                    New Faculty Member?{" "}
+                    <span
+                        style={{ color: "#0f766e", fontWeight: "600", cursor: "pointer", textDecoration: "underline" }}
+                        onClick={() => navigate("/register-professor")}
+                    >
+                        Register as Professor
+                    </span>
+                </div>
+
+
                 {/* Error */}
 
                 {error && (
-                    <div className="login-error">
+                    <div className="login-error" style={{ marginTop: "16px" }}>
                         {error}
                     </div>
                 )}

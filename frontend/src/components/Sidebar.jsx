@@ -34,13 +34,51 @@ function Sidebar({ role }) {
         { name: "Settings", path: "/professor/settings", icon: "⚙️" }
     ];
 
-    const currentRole = role || (JSON.parse(localStorage.getItem("user") || "{}").role) || "PROFESSOR";
-    const links = currentRole === "STUDENT" ? studentLinks : professorLinks;
+    const hodLinks = [
+        { name: "HOD Dashboard", path: "/hod/dashboard", icon: "🏢" },
+        { name: "Prof Approvals", path: "/hod/approvals", icon: "🔔" },
+        { name: "Dept Professors", path: "/hod/professors", icon: "👨‍🏫" },
+        { name: "Dept Students", path: "/hod/students", icon: "👥" },
+        { name: "Bulk Student Import", path: "/hod/bulk-import", icon: "📥" },
+        { name: "Create Exam", path: "/professor/create-exam", icon: "➕" },
+        { name: "Upcoming Exams", path: "/professor/upcoming-exams", icon: "📋" },
+        { name: "Active Exams", path: "/professor/active-exams", icon: "⚡" },
+        { name: "Past Exams", path: "/professor/past-exams", icon: "📜" },
+        { name: "Attendance", path: "/professor/attendance", icon: "📅" },
+        { name: "Profile", path: "/professor/profile", icon: "👤" },
+        { name: "Settings", path: "/professor/settings", icon: "⚙️" }
+    ];
+
+    const adminLinks = [
+        { name: "Admin Dashboard", path: "/admin/dashboard", icon: "📊" },
+        { name: "HOD Management", path: "/admin/hods", icon: "👨‍💼" },
+        { name: "Professors", path: "/admin/professors", icon: "👨‍🏫" },
+        { name: "Students", path: "/admin/students", icon: "🎓" },
+        { name: "Profile", path: "/professor/profile", icon: "👤" },
+        { name: "Settings", path: "/professor/settings", icon: "⚙️" }
+    ];
+
+    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+    const currentRole = (role || storedUser.role || "PROFESSOR").toUpperCase();
+
+    let links = professorLinks;
+    let portalTitle = "FACULTY PORTAL";
+
+    if (currentRole === "STUDENT") {
+        links = studentLinks;
+        portalTitle = "STUDENT PORTAL";
+    } else if (currentRole === "HOD") {
+        links = hodLinks;
+        portalTitle = "HOD PORTAL";
+    } else if (currentRole === "ADMIN") {
+        links = adminLinks;
+        portalTitle = "ADMIN PORTAL";
+    }
 
     return (
         <aside className="ddu-sidebar">
             <div className="ddu-sidebar-title">
-                {currentRole === "STUDENT" ? "STUDENT PORTAL" : "FACULTY PORTAL"}
+                {portalTitle}
             </div>
 
             <nav className="ddu-sidebar-nav">

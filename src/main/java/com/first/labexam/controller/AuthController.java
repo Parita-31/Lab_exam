@@ -8,10 +8,11 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.first.labexam.dto.ProfessorRegisterRequest;
+
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:5173")
-
+@CrossOrigin(origins = "*")
 public class AuthController {
 
     private final AuthService authService;
@@ -27,6 +28,15 @@ public class AuthController {
 
         return ResponseEntity.ok(
                 authService.login(request)
+        );
+    }
+
+    @PostMapping("/register-professor")
+    public ResponseEntity<LoginResponse> registerProfessor(
+            @Valid @RequestBody ProfessorRegisterRequest request
+    ) {
+        return ResponseEntity.ok(
+                authService.registerProfessor(request)
         );
     }
 }

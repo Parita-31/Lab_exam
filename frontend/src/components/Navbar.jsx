@@ -15,13 +15,20 @@ function Navbar({ user: propUser }) {
         navigate("/login");
     };
 
-    const role = user?.role || "STUDENT";
-    const userName = user?.name || (role === "STUDENT" ? "JASANI TRUSHI JAGDISHBHAI" : "PROFESSOR");
+    const role = (user?.role || "STUDENT").toUpperCase();
+    const userName = user?.name || (role === "STUDENT" ? "JASANI TRUSHI JAGDISHBHAI" : "FACULTY");
     const profileImg = user?.profileImage || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80";
+
+    const getDashboardPath = () => {
+        if (role === "ADMIN") return "/admin/dashboard";
+        if (role === "HOD") return "/hod/dashboard";
+        if (role === "PROFESSOR") return "/professor/dashboard";
+        return "/student/dashboard";
+    };
 
     return (
         <header className="ddu-top-header">
-            <div className="ddu-brand-container" onClick={() => navigate(role === "STUDENT" ? "/student/dashboard" : "/professor/dashboard")}>
+            <div className="ddu-brand-container" onClick={() => navigate(getDashboardPath())} style={{ cursor: "pointer" }}>
                 <DduLogo height={42} />
             </div>
 
